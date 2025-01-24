@@ -6,6 +6,7 @@ import zlib from 'zlib';
 import { Readable } from 'stream';
 
 interface Config {
+    target: string;
     bodyDelay: number;
     splitPoints: string[];
 }
@@ -21,7 +22,6 @@ const pageCache: Map<string, CacheEntry> = new Map();
 let config: Config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
 let introCompleted: boolean = false;
 
-const ORIGIN: string = 'https://www.galaxus.ch';
 const sslConfig = {
     key: fs.readFileSync('./certificate/key.pem'),
     cert: fs.readFileSync('./certificate/cert.pem')
@@ -72,6 +72,7 @@ app.post('/help/config', express.json(), (req: Request, res: Response) => {
     if (isValid) {
         config.bodyDelay = req.body.delay;
         config.splitPoints = req.body.splitPoints;
+        config.target = req.body.target || config.target;
         fs.writeFileSync('config.json', JSON.stringify(config, null, 4));
         res.json({ success: true });
     } else {
@@ -81,7 +82,7 @@ app.post('/help/config', express.json(), (req: Request, res: Response) => {
 
 // Proxy middleware setup
 const proxyMiddleware: RequestHandler = createProxyMiddleware({
-    target: ORIGIN,
+    target: config.target,
     changeOrigin: true,
     secure: true,
     selfHandleResponse: true,
@@ -97,7 +98,7 @@ const proxyMiddleware: RequestHandler = createProxyMiddleware({
             return;
         }
 
-        const targetUrl = new URL(req.url, ORIGIN).toString();
+        const targetUrl = new URL(req.url, config.target).toString();
 
         try {
             const responseBuffer = await handleCompressedResponse(proxyRes);
@@ -123,7 +124,7 @@ const proxyMiddleware: RequestHandler = createProxyMiddleware({
 
 // Mount middleware
 app.use('/', async (req: Request, res: Response, next: NextFunction) => {
-    const targetUrl = new URL(req.url, ORIGIN).toString();
+    const targetUrl = new URL(req.url, config.target).toString();
     const startTime = Date.now();
     
     if (req.query['no-cache']) {
