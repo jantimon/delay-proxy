@@ -25,19 +25,19 @@ https://github.com/user-attachments/assets/2a0225ee-aee7-4fb3-b0b6-95c1858a7fda
 
 2. Install the dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. Generate SSL certificates:
    ```bash
-   npm run cert
+   pnpm run cert
    ```
 
 ## Usage
 
 1. Start the proxy server:
    ```bash
-   npm start
+   pnpm start
    ```
 
 2. Visit the proxy server:
@@ -48,6 +48,49 @@ https://github.com/user-attachments/assets/2a0225ee-aee7-4fb3-b0b6-95c1858a7fda
 ## Configuration
 
 You can configure the delay and split points by editing the `config.json` file or via the `/help` page provided by the server.
+
+### Experiment Ideas
+
+Here are some examples of interesting experiments you can try:
+
+- **Streaming only until `<body>`:**
+  Configure the split point to stop streaming at the `<body>` tag.
+  ```json
+  {
+    "splitPoints": ["<body"]
+  }
+  ```
+
+- **Streaming after header:**
+  Configure the split point to start streaming after the header.
+  ```json
+  {
+    "splitPoints": ["</header>"]
+  }
+  ```
+
+- **Pausing after the LCP element (e.g., the first image):**
+  Configure the split point to pause after the LCP element.
+  ```json
+  {
+    "splitPoints": ["<img"]
+  }
+  ```
+
+### Split Chunks Configuration
+
+You can configure split chunks using regular expressions in the `config.json` file. This allows you to define more flexible split points.
+
+Example:
+```json
+{
+  "splitPoints": ["/<div class=\"layout_Page__uf51q\"/i", "/<body/i"]
+}
+```
+
+### User Research Simulations
+
+This setup can be useful for simulating different network conditions and delays for user research. By introducing controlled delays, you can observe how users interact with your website under various scenarios.
 
 ## License
 
