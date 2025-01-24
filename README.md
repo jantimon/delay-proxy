@@ -4,6 +4,10 @@
 
 Delay Proxy is an experimental HTTPS proxy server designed for performance testing. It allows you to introduce configurable delays in the response stream to simulate different network conditions and analyze page load performance.
 
+
+https://github.com/user-attachments/assets/2a0225ee-aee7-4fb3-b0b6-95c1858a7fda
+
+
 ## Features
 
 - **Caching:** Caches the HTML content on the first visit.
