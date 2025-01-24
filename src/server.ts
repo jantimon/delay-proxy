@@ -169,9 +169,23 @@ app.use('/', async (req: Request, res: Response, next: NextFunction) => {
                 }
 
                 const contentStr = cached.content.toString('utf-8');
-                const splitPoint = config.splitPoints.find(point => contentStr.includes(point));
-                const splitPosition = splitPoint ? contentStr.indexOf(splitPoint) : contentStr.length;
 
+                let splitPosition: number = contentStr.length;
+                for (const point of config.splitPoints) {
+                    if (point.startsWith('/') && point.endsWith('/')) {
+                        const regex = new RegExp(point.slice(1, -1), 'gi');
+                        if (regex.test(contentStr)) {
+                            splitPosition = contentStr.search(regex);
+                            log("Splitting at regex", regex);
+                            break;
+                        }
+                    }
+                    if (contentStr.includes(point)) {
+                        splitPosition = contentStr.indexOf(point);
+                        log("Splitting at", point);
+                        break;
+                    }
+                }
                 const [firstPart, secondPart] = [
                     contentStr.slice(0, splitPosition),
                     contentStr.slice(splitPosition)
