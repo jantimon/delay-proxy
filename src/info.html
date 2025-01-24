@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>URL Added to Cache</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        .reload {
+            display: inline-block;
+            background: #0070f3;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+        .reload:hover {
+            background: #0051b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Page Cached</h1>
+        <p>This URL has been added to the experiment cache.</p>
+        <a href="" class="reload" onclick="location.reload(); return false;">Reload to Continue</a>
+    </div>
+</body>
+</html>

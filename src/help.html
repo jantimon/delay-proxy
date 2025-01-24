@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delay Proxy - Documentation</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        .card {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .config {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            flex-direction: column;
+        }
+        button {
+            background: #0070f3;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background: #0051b3;
+        }
+        input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100px;
+            font-size: 1rem;
+        }
+        .success {
+            color: #0070f3;
+            display: none;
+            margin-left: 1rem;
+            font-weight: 500;
+        }
+        code {
+            background: #e8e8e8;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        ul {
+            padding-left: 1.2rem;
+        }
+        li {
+            margin: 0.5rem 0;
+        }
+        h1 {
+            margin-top: 0;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            margin: 0 0 1rem 0;
+            color: #0070f3;
+        }
+        .split-points {
+            margin-top: 1rem;
+        }
+        .split-point {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .split-point input {
+            width: 200px;
+        }
+        .remove-btn {
+            background: #dc3545;
+            padding: 0.25rem 0.5rem;
+        }
+        .remove-btn:hover {
+            background: #bb2d3b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Delay Proxy Documentation</h1>
+    
+    <div class="card">
+        <h2>How it works</h2>
+        <p>This proxy server helps test page load performance by introducing controlled delays:</p>
+        <ul>
+            <li><strong>First Visit:</strong> Caches the HTML content</li>
+            <li><strong>Subsequent Visits:</strong> Streams content with a configurable delay at the &lt;body&gt; tag</li>
+            <li><strong>Cache Control:</strong> Add <code>?no-cache</code> to any URL to clear its cache</li>
+            <li><strong>Assets:</strong> Static files (images, CSS, JS) are proxied without caching or delays</li>
+        </ul>
+    </div>
+    <div class="card">
+        <h2>Start</h2>
+        <button onclick="window.location.href='/'">Go to Home</button>
+    </div>
+    <div class="card">
+        <h2>Configuration</h2>
+        <div class="config">
+            <label>
+                Body Tag Delay (ms):
+                <input type="number" id="delay" value="1000" min="0" step="100">
+            </label>
+            <div class="split-points" id="splitPoints"></div>
+            <button onclick="updateConfig()">Update</button>
+            <span class="success" id="success">Settings saved!</span>
+        </div>
+    </div>
+    <script>
+        function createSplitPointInput(value = '') {
+            const div = document.createElement('div');
+            div.className = 'split-point';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            input.placeholder = 'Enter split point';
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = '×';
+            removeBtn.onclick = () => {
+                div.remove();
+                checkEmptyInput();
+            };
+            
+            div.appendChild(input);
+            div.appendChild(removeBtn);
+            return div;
+        }
+
+        function checkEmptyInput() {
+            const container = document.getElementById('splitPoints');
+            const inputs = container.querySelectorAll('input');
+            const hasEmpty = Array.from(inputs).some(input => !input.value);
+            
+            if (!hasEmpty) {
+                container.appendChild(createSplitPointInput());
+            }
+        }
+
+        async function updateConfig() {
+            const delay = parseInt(document.getElementById('delay').value);
+            const splitPoints = Array.from(document.querySelectorAll('.split-point input'))
+                .map(input => input.value)
+                .filter(value => value.trim());
+
+            const response = await fetch('/help/config', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ delay, splitPoints })
+            });
+            
+            if (response.ok) {
+                const success = document.getElementById('success');
+                success.style.display = 'inline';
+                setTimeout(() => {
+                    success.style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        // Load current config
+        fetch('/help/config')
+            .then(r => r.json())
+            .then(config => {
+                document.getElementById('delay').value = config.bodyDelay;
+                const container = document.getElementById('splitPoints');
+                
+                config.splitPoints.forEach(point => {
+                    container.appendChild(createSplitPointInput(point));
+                });
+                container.appendChild(createSplitPointInput());
+
+                container.addEventListener('input', checkEmptyInput);
+            });
+    </script>
+</body>
+</html>

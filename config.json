@@ -1,0 +1,7 @@
+{
+    "bodyDelay": 5000,
+    "splitPoints": [
+        "<div class=\"layout_Page__uf51q\"",
+        "<body"
+    ]
+}
